@@ -1,6 +1,12 @@
 from fastapi import FastAPI
-
 from app.routes.health import router as health_router
+
+from app.database import Base, engine
+from app.models.meeting import Meeting
+from app.routes.meetings import router as meetings_router
+
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="AI Meeting Catch-Up Assistant",
@@ -9,6 +15,7 @@ app = FastAPI(
 )
 
 app.include_router(health_router)
+app.include_router(meetings_router)
 
 @app.get("/")
 def root():
