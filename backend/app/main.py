@@ -4,7 +4,7 @@ from app.routes.health import router as health_router
 from app.database import Base, engine
 from app.models.meeting import Meeting
 from app.routes.meetings import router as meetings_router
-
+from app.routes import meetings
 
 Base.metadata.create_all(bind=engine)
 
@@ -16,6 +16,7 @@ app = FastAPI(
 
 app.include_router(health_router)
 app.include_router(meetings_router)
+app.include_router(meetings.router)
 
 @app.get("/")
 def root():
