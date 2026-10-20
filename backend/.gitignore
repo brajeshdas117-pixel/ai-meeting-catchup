@@ -3,3 +3,5 @@ __pycache__/
 *.pyc
 .env
 .DS_Store
+# Uploaded meeting audio files
+uploads/
