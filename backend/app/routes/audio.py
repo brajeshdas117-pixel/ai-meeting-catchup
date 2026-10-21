@@ -94,3 +94,67 @@ def upload_meeting_audio(
 
     finally:
         file.file.close()
+
+
+@router.get("/{meeting_id}/recordings")
+def get_meeting_recordings(
+    meeting_id: int,
+    db: Session = Depends(get_db),
+):
+    meeting = db.query(Meeting).filter(
+        Meeting.id == meeting_id
+    ).first()
+
+    if meeting is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Meeting not found",
+        )
+
+    recordings = db.query(MeetingRecording).filter(
+        MeetingRecording.meeting_id == meeting_id
+    ).order_by(MeetingRecording.uploaded_at.desc()).all()
+
+    return {
+        "meeting_id": meeting_id,
+        "total_recordings": len(recordings),
+        "recordings": [
+            {
+                "recording_id": recording.id,
+                "original_filename": recording.original_filename,
+                "content_type": recording.content_type,
+                "size_bytes": recording.size_bytes,
+                "uploaded_at": recording.uploaded_at,
+            }
+            for recording in recordings
+        ],
+    }
+
+
+@router.get("/{meeting_id}/recordings/{recording_id}")
+def get_recording_details(
+    meeting_id: int,
+    recording_id: int,
+    db: Session = Depends(get_db),
+):
+    recording = db.query(MeetingRecording).filter(
+        MeetingRecording.id == recording_id,
+        MeetingRecording.meeting_id == meeting_id,
+    ).first()
+
+    if recording is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Recording not found for this meeting",
+        )
+
+    return {
+        "recording_id": recording.id,
+        "meeting_id": recording.meeting_id,
+        "original_filename": recording.original_filename,
+        "stored_filename": recording.stored_filename,
+        "content_type": recording.content_type,
+        "size_bytes": recording.size_bytes,
+        "uploaded_at": recording.uploaded_at,
+    }
+
